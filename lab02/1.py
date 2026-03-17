@@ -6,16 +6,13 @@ def count_code_words():
     other_letters = ['A', 'B', 'C', 'D']
 
     # Генерируем все возможные комбинации для позиций 2-4
-    total_count=0
-    for letter2 in other_letters:
-        for letter3 in other_letters:
-            for letter4 in other_letters:
-            
+    other_combinations = list(itertools.product(other_letters, repeat=3))
 
+    total_count = 0
 
-                total_count += 1
-
-    
+    for first in first_letters:
+        # Для каждой первой буквы добавляем все комбинации остальных
+        total_count += len(other_combinations)
 
     return total_count
 
