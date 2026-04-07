@@ -4,12 +4,12 @@
 ```python
 import requests
 
+
 # Замыкание: функция запоминает URL API
 def make_fetcher(url):
     def fetch():
         # выполняем запрос к API
-        response = requests.get(url)
-        return response.text  # возвращаем текст ответа
+        return requests.get(url).json()["data"][0]["attributes"]["body"]
     return fetch  # возвращаем внутреннюю функцию
 
 
@@ -24,7 +24,8 @@ fetch_data = make_fetcher(url)
 print(fetch_data())
 ```
 ### Результат программы
-<img width="1110" height="38" alt="image" src="https://github.com/user-attachments/assets/1848539d-83dc-4441-a0b4-5a879e80ff17" />
+<img width="1041" height="37" alt="image" src="https://github.com/user-attachments/assets/6970ddf5-0f2c-4a1b-be59-09567454fbd9" />
+
 
 ЗАДАНИЕ 02.py
 ### Задание: Декоратор, ограничивающий частоту вызовов функций.
@@ -38,43 +39,45 @@ def rate_limit(seconds):  # seconds — интервал между вызова
     def decorator(func):  # принимает функцию
         last_time = 0  # время последнего вызова
 
-        def wrapper():  # обёртка вокруг функции
+        def wrapper(*args, **kwargs):  # обёртка вокруг функции
             nonlocal last_time  # используем переменную из внешней области
 
             now = time.time()  # текущее время
 
             if now - last_time < seconds:  # если прошло мало времени
-                time.sleep(seconds - (now - last_time))  # ждём
+                print("Слишком частый вызов!")
+                return
 
-            last_time = time.time()  # обновляем время вызова
-            return func()  # вызываем исходную функцию
+            last_time = now  # обновляем время вызова
+            return func(*args, **kwargs)  # вызываем исходную функцию
 
         return wrapper  # возвращаем обёртку
     return decorator  # возвращаем декоратор
 
 
 # замыкание: сохраняет URL
+@rate_limit(5)
 def make_fetcher(url):  # url передаётся один раз
 
-    @rate_limit(3)  # применяем декоратор (не чаще 1 раза в 3 сек)
+  
     def fetch():  # внутренняя функция
-        return requests.get(url).text  # отправляем запрос и берём текст
+        return requests.get(url).json()["data"][0]["attributes"]["body"] # отправляем запрос и берём текст
 
     return fetch  # возвращаем функцию с запомненным url
 
 
-# создаём функцию для API
-fetch_data = make_fetcher("https://dogapi.dog/api/v2/facts")  # создаём замыкание
+
 
 
 for i in range(5):  # цикл 5 раз
     print(f"\nЗапрос {i+1}:")  # вывод номера запроса
-    print(fetch_data())  # вызываем функцию
+    print(make_fetcher("https://dogapi.dog/api/v2/facts"))  # вызываем функцию
 ```
 
 ### Результат программы
 
-<img width="1729" height="285" alt="image" src="https://github.com/user-attachments/assets/838f16e9-728f-41be-b746-633ccd778557" />
+<img width="766" height="283" alt="image" src="https://github.com/user-attachments/assets/f1e23f21-69d7-40f8-9a6e-c32dfb7d9af1" />
+
 
 ##### Используемые материалы:
 
