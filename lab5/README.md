@@ -3,50 +3,27 @@
 ### Генератор для построчного чтения файла. Если длина строки превышает заданный предел - возвращает подстроку допустимого размера. Переверните слова в строках, возращаемых генератором.
 
 ```python
-from typing import Generator  # явно показываем, что функция возвращает генератор
+from typing import Generator
+from functools import partial  # чтобы передать limit без lambda
 
 def process_line(line: str, limit: int) -> str:
-    line = line.rstrip("\n")  # убираем \n, чтобы не влиял на длину и вывод
+    line = line.rstrip("\n")  # убираем перенос строки
 
     if len(line) > limit:
-        line = line[:limit]  # ограничиваем длину строки по условию
+        line = line[:limit]  # ограничиваем длину
 
-    words = line.split()  # разбиваем строку на слова
+    words = line.split()
     return " ".join(reversed(words))  
-    # reversed без list → экономим память, join умеет работать с итератором
+    # reversed без list → экономия памяти
 
 def read_file_generator(file_path: str, limit: int) -> Generator[str, None, None]:
     with open(file_path, "r", encoding="utf-8") as f:  
-        # with гарантирует закрытие файла
+        # partial "фиксирует" limit → функция принимает только line
+        func = partial(process_line, limit=limit)
 
-        for line in f:  # читаем файл построчно (лениво)
-            yield process_line(line, limit)  
-            # yield отдаёт результат сразу → не храним весь файл в памяти
-
-
-for line in read_file_generator("input.txt", 30):  
-        # генератор даёт строки по одной
-        
-    print(line)  
-        # выводим сразу, без накопленияfrom typing import Generator  # явно показываем, что функция возвращает генератор
-
-def process_line(line: str, limit: int) -> str:
-    line = line.rstrip("\n")  # убираем \n, чтобы не влиял на длину и вывод
-
-    if len(line) > limit:
-        line = line[:limit]  # ограничиваем длину строки по условию
-
-    words = line.split()  # разбиваем строку на слова
-    return " ".join(reversed(words))  
-    # reversed без list → экономим память, join умеет работать с итератором
-
-def read_file_generator(file_path: str, limit: int) -> Generator[str, None, None]:
-    with open(file_path, "r", encoding="utf-8") as f:  
-        # with гарантирует закрытие файла
-
-        for line in f:  # читаем файл построчно (лениво)
-            yield process_line(line, limit)  
-            # yield отдаёт результат сразу → не храним весь файл в памяти
+        yield from map(func, f)  
+        # map применяет функцию к каждой строке
+        # yield from отдаёт результаты по одному
 
 
 for line in read_file_generator("input.txt", 30):  
