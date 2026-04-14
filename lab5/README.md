@@ -33,6 +33,8 @@ for processed_line in process_file(file_path, max_length):
     print(processed_line)
 ```
 ### Результат:
-<img width="758" height="48" alt="image" src="https://github.com/user-attachments/assets/81024996-eec3-4003-9f76-3422a3cab72d" />
+
+<img width="690" height="44" alt="image" src="https://github.com/user-attachments/assets/ca18210d-5781-4cc7-afd0-c6ad3effbf7a" />
+
 
 [Генераторы в питон](https://python-teach.ru/python-dlya-nachinayushhih/generatory-v-python/)
