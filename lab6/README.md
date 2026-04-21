@@ -66,8 +66,10 @@ class Building:
 ```python
 import tkinter as tk
 from tkinter import messagebox
+
 from premises.room import Room
 from premises.apartment import Apartment
+from premises.building import Building
 
 from docx import Document
 from openpyxl import Workbook
@@ -75,11 +77,12 @@ from openpyxl import Workbook
 class App:
     def __init__(self, root):
         self.root = root
-        self.root.title("Расчёт помещений")
+        self.root.title("Многоэтажный дом")
 
-        self.apartment = Apartment()
+        self.building = Building()
+        self.current_apartment = Apartment()
+
         self.create_widgets()
-        
 
     def create_widgets(self):
         # ввод
@@ -97,18 +100,25 @@ class App:
 
         # кнопки
         tk.Button(text="Добавить комнату", command=self.add_room).grid(row=3, column=0, columnspan=2)
-        tk.Button(text="Рассчитать", command=self.calculate).grid(row=4, column=0, columnspan=2)
-        tk.Button(text="Сохранить DOCX", command=self.save_docx).grid(row=5, column=0)
-        tk.Button(text="Сохранить XLSX", command=self.save_xlsx).grid(row=5, column=1)
+        tk.Button(text="Новая квартира", command=self.new_apartment).grid(row=4, column=0, columnspan=2)
+        tk.Button(text="Рассчитать дом", command=self.calculate).grid(row=5, column=0, columnspan=2)
+
+        tk.Button(text="Сохранить DOCX", command=self.save_docx).grid(row=6, column=0)
+        tk.Button(text="Сохранить XLSX", command=self.save_xlsx).grid(row=6, column=1)
 
         # список комнат
-        tk.Label(text="Список комнат").grid(row=0, column=2)
-        self.room_listbox = tk.Listbox(width=40, height=10)
-        self.room_listbox.grid(row=1, column=2, rowspan=5)
+        tk.Label(text="Комнаты").grid(row=0, column=2)
+        self.room_list = tk.Listbox(width=40, height=10)
+        self.room_list.grid(row=1, column=2, rowspan=5)
+
+        # список квартир
+        tk.Label(text="Квартиры").grid(row=0, column=3)
+        self.apartment_list = tk.Listbox(width=40, height=10)
+        self.apartment_list.grid(row=1, column=3, rowspan=5)
 
         # результат
         self.result = tk.Label(text="")
-        self.result.grid(row=6, column=0, columnspan=3)
+        self.result.grid(row=7, column=0, columnspan=4)
 
     def add_room(self):
         try:
@@ -120,53 +130,73 @@ class App:
                 raise ValueError
 
             room = Room(l, w, h)
-            self.apartment.add_room(room)
+            self.current_apartment.add_room(room)
 
-            # добавляем в список
-            index = len(self.apartment.rooms)
-            self.room_listbox.insert(
+            self.room_list.insert(
                 tk.END,
-                f"Комната {index}: {l}x{w}x{h} | {room.area():.2f} м²"
+                f"{l}x{w}x{h} | {room.area():.1f} м²"
             )
 
-            messagebox.showinfo("OK", "Комната добавлена")
-
         except ValueError:
-            messagebox.showerror("Ошибка", "Введите корректные положительные числа")
+            messagebox.showerror("Ошибка", "Введите корректные числа")
+
+    def new_apartment(self):
+        if not self.current_apartment.rooms:
+            messagebox.showwarning("Внимание", "Нет комнат")
+            return
+
+        self.building.add_apartment(self.current_apartment)
+
+        index = len(self.building.apartments)
+        area = self.current_apartment.total_area()
+
+        self.apartment_list.insert(
+            tk.END,
+            f"Квартира {index}: {area:.1f} м²"
+        )
+
+        # новая квартира
+        self.current_apartment = Apartment()
+        self.room_list.delete(0, tk.END)
 
     def calculate(self):
-        area = self.apartment.total_area()
-        heat = self.apartment.total_heat()
+        area = self.building.total_area()
+        heat = self.building.total_heat()
 
-        self.result.config(text=f"Площадь: {area:.2f} м²\nТепло: {heat:.2f} Вт")
+        self.result.config(
+            text=f"Дом: {area:.1f} м² | {heat:.1f} Вт"
+        )
 
     def save_docx(self):
         doc = Document()
-        doc.add_heading("Отчёт", 0)
+        doc.add_heading("Отчёт по дому", 0)
 
-        for i, room in enumerate(self.apartment.rooms, 1):
-            doc.add_paragraph(f"Комната {i}: {room.area():.2f} м²")
+        for i, apt in enumerate(self.building.apartments, 1):
+            doc.add_paragraph(f"Квартира {i}: {apt.total_area():.1f} м²")
 
-        doc.add_paragraph(f"Общая площадь: {self.apartment.total_area():.2f} м²")
-        doc.add_paragraph(f"Тепловая мощность: {self.apartment.total_heat():.2f} Вт")
+        doc.add_paragraph(f"Общий метраж: {self.building.total_area():.1f} м²")
+        doc.add_paragraph(f"Тепло: {self.building.total_heat():.1f} Вт")
 
-        doc.save("report.docx")
+        doc.save("building.docx")
 
     def save_xlsx(self):
         wb = Workbook()
         ws = wb.active
 
-        ws["A1"] = "Комната"
+        ws["A1"] = "Квартира"
         ws["B1"] = "Площадь"
 
-        for i, room in enumerate(self.apartment.rooms, 1):
-            ws[f"A{i+1}"] = f"Комната {i}"
-            ws[f"B{i+1}"] = room.area()
+        for i, apt in enumerate(self.building.apartments, 1):
+            ws[f"A{i+1}"] = f"Квартира {i}"
+            ws[f"B{i+1}"] = apt.total_area()
 
         ws["A10"] = "Итого"
-        ws["B10"] = self.apartment.total_area()
+        ws["B10"] = self.building.total_area()
 
-        wb.save("report.xlsx")
+        wb.sav
+
+
+("building.xlsx")
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -175,7 +205,8 @@ if __name__ == "__main__":
 ```
 ## Результат программмы
 
-<img width="630" height="249" alt="image" src="https://github.com/user-attachments/assets/9c51af2c-e538-497c-9c2b-b9a8c6b31894" />
+<img width="954" height="266" alt="image" src="https://github.com/user-attachments/assets/8627c46c-aa06-4796-af42-4220101ae931" />
+
 
 ## Описание проделанной работы
 
@@ -185,7 +216,7 @@ if __name__ == "__main__":
 
 * `room.py` — описание комнаты и расчёт её площади и тепловой мощности;
 * `apartment.py` — объединение нескольких комнат и расчёт общих значений;
-* `building.py` — объединение квартир в дом.
+* `building.py` — объединение квартир в  многоэтажный дом.
 
 В основной программе реализован интерфейс, позволяющий:
 
