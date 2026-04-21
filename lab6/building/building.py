@@ -1,7 +1,7 @@
-from .apartment import Apartment
+from apartment.apartment import Apartment
 
 class Building:
-    def __init__(self):
+    def init(self):
         self.apartments: list[Apartment] = []
 
     def add_apartment(self, apartment: Apartment):

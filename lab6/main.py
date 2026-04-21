@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox
 
-from premises.room import Room
-from premises.apartment import Apartment
-from premises.building import Building
+from room.room import Room
+from apartment.apartment import Apartment
+from building.building import Building
 
 from docx import Document
 from openpyxl import Workbook

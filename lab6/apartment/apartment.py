@@ -1,7 +1,7 @@
-from .room import Room
+from room.room import Room
 
 class Apartment:
-    def __init__(self):
+    def init(self):
         self.rooms: list[Room] = []
 
     def add_room(self, room: Room):

@@ -1,5 +1,5 @@
 class Room:
-    def __init__(self, length: float, width: float, height: float):
+    def init(self, length: float, width: float, height: float):
         self.length = length
         self.width = width
         self.height = height
