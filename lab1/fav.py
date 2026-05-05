@@ -15,8 +15,8 @@ my_favorite_movies = 'Терминатор, Пятый элемент, Ават�
 # Использовать .split() или .find()или другие методы строки нельзя - пользуйтесь только срезами,
 # как указано в задании!
 
-
-print(my_favorite_movies[0:10])
-print(my_favorite_movies[42:])
-print(my_favorite_movies[12:25])
-print(my_favorite_movies[35:40])
+def run():
+    print(my_favorite_movies[0:10])
+    print(my_favorite_movies[42:])
+    print(my_favorite_movies[12:25])
+    print(my_favorite_movies[35:40])
