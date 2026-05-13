@@ -52,15 +52,15 @@ def seq_iterative(k):
 
 
 
-data = [1, [2, [3, 4, [5]]]]
+data = [1, [2, [3, [4], [5]]]]
 
-print(">>> Рекурсия([1, [2, [3, 4, [5]]]])")
+print(">>> Рекурсия([1, [2, [3, [4], [5]]]])")
 print(sum_recursive(data))
 
 print("\n>>> Без рекурсии([1, [2, [3, 4, [5]]]])")
 print(sum_nested_iterative(data))
 
-k = 5
+k = 15
 
 print("\n>>> seq_recursive(5)")
 print(seq_recursive(k))
